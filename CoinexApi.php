@@ -1,0 +1,119 @@
+<?php
+
+include_once('CoinexHttpClient.php');
+
+class CoinexApi extends CoinexHttpClient
+{
+    public function __construct($access_id, $secret_key)
+    {
+        parent::__construct($access_id, $secret_key);
+    }
+
+    public function changeLeverage($market, $leverage)
+    {
+        $type = $this->setting['position_type'];
+        $params = [
+            'market' => $market,
+            'leverage' => $leverage,
+            'position_type' => $type,
+        ];
+
+        return $this->callApi('market/adjust_leverage', $params, 'POST');
+    }
+
+    public function putLimitOrder($market, $side, $price)
+    {
+        $initBalance = $this->setting['InitialBalance'];
+        $leverage = $this->setting['leverage'];
+        $amount = $initBalance * $leverage / $price;
+        $TPP = $this->setting['TPP'];
+        if ($side == 2) {
+            $price = $price + (($price / 100) * $TPP);
+        } else {
+            $price = $price - (($price / 100) * $TPP);
+        }
+        $params = [
+            'market' => $market,
+            'side' => $side,
+            'amount' => $amount,
+            'price' => $price,
+        ];
+        $result = $this->callApi('order/put_limit', $params, "POST");
+        return $result["data"]["order_id"];
+    }
+
+    public function putTakeProfitOrder($market, $side, $price, $amount)
+    {
+        $TPP = $this->setting['TPP'];
+        if ($side == 2) {
+            $price = $price + (($price / 100) * $TPP);
+        } else {
+            $price = $price - (($price / 100) * $TPP);
+        }
+        if ($side == 1) {
+            $side = 2;
+        } else {
+            $side = 1;
+        }
+        $params = [
+            'market' => $market,
+            'side' => $side,
+            'amount' => $amount,
+            'price' => $price,
+        ];
+        return $this->callApi('order/put_limit', $params, "POST");
+    }
+
+    public function putStopLimitOrder($market, $side, $price, $amount)
+    {
+        $stop_price = null;
+        if ($side == 2) {
+            $stop_price = $price - (($price / 100) * 2);
+        } else {
+            $stop_price = $price + (($price / 100) * 2);
+        }
+
+        if ($side == 2) {
+            $price = $price - (($price / 100) * 2.1);
+        } else {
+            $price = $price + (($price / 100) * 2.1);
+        }
+        if ($side == 1) {
+            $side = 2;
+        } else {
+            $side = 1;
+        }
+        $params = [
+            'market' => $market,
+            'side' => $side,
+            'stop_type' => 1,
+            'amount' => $amount,
+            'stop_price' => $stop_price,
+            'price' => $price
+        ];
+        return $this->callApi('order/put_stop_limit', $params, "POST");
+    }
+
+    public function getLastPrice($market)
+    {
+        $params = [
+            'market' => $market,
+        ];
+        $result = $this->callApi('market/ticker', $params, "GET");
+        return $result["data"]["ticker"]["last"];
+    }
+
+    public function getCurrentPositions()
+    {
+        return $this->callApi('position/pending');
+    }
+
+    public function getOrderStatus($market, $orderId)
+    {
+        $params = [
+            'market' => $market,
+            'order_id' => $orderId,
+        ];
+        return $this->callApi('order/status', $params, "GET");
+    }
+}
