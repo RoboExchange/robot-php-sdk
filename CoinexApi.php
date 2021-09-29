@@ -4,14 +4,14 @@ include_once('CoinexHttpClient.php');
 
 class CoinexApi extends CoinexHttpClient
 {
-    public function __construct($access_id, $secret_key)
+    public function __construct()
     {
-        parent::__construct($access_id, $secret_key);
+        parent::__construct();
     }
 
     public function changeLeverage($market, $leverage)
     {
-        $type = $this->setting['position_type'];
+        $type = getenv("POSITION_TYPE");
         $params = [
             'market' => $market,
             'leverage' => $leverage,
@@ -23,10 +23,10 @@ class CoinexApi extends CoinexHttpClient
 
     public function putLimitOrder($market, $side, $price)
     {
-        $initBalance = $this->setting['InitialBalance'];
-        $leverage = $this->setting['leverage'];
+        $initBalance = getenv("INITIAL_BALANCE");
+        $leverage = getenv("LEVERAGE");
         $amount = $initBalance * $leverage / $price;
-        $TPP = $this->setting['TPP'];
+        $TPP = getenv("TPP");
         if ($side == 2) {
             $price = $price + (($price / 100) * $TPP);
         } else {
@@ -44,7 +44,7 @@ class CoinexApi extends CoinexHttpClient
 
     public function putTakeProfitOrder($market, $side, $price, $amount)
     {
-        $TPP = $this->setting['TPP'];
+        $TPP = getenv("TPP");
         if ($side == 2) {
             $price = $price + (($price / 100) * $TPP);
         } else {

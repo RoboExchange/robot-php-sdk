@@ -6,19 +6,17 @@ class CoinexHttpClient
     public $secret_key;
     private $timestamp;
     private $sign;
-    public $setting;
 
-    public function __construct($access_id, $secret_key)
+    public function __construct()
     {
-        $this->access_id = $access_id;
-        $this->secret_key = $secret_key;
+        $this->access_id = getenv("ACCESS_ID");
+        $this->secret_key = getenv("SECRET_KEY");
         $this->timestamp = round(microtime(true) * 1000);
-        $this->setting = parse_ini_file("config.ini");
     }
 
     public function callApi($url = '', $params = '', $method = '')
     {
-        $base_url = $this->setting['base_url'];
+        $base_url = getenv("BASE_URL");
 
         //check CURL extension
         if (!extension_loaded('curl')) {
