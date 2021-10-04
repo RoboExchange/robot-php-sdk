@@ -38,8 +38,7 @@ class CoinexApi extends CoinexHttpClient
             'amount' => $amount,
             'price' => $price,
         ];
-        $result = $this->callApi('order/put_limit', $params, "POST");
-        return $result["data"]["order_id"];
+        return $this->callApi('order/put_limit', $params, "POST");
     }
 
     public function putTakeProfitOrder($market, $side, $price, $amount)
@@ -103,9 +102,12 @@ class CoinexApi extends CoinexHttpClient
         return $result["data"]["ticker"]["last"];
     }
 
-    public function getCurrentPositions()
+    public function getCurrentPositions($market)
     {
-        return $this->callApi('position/pending');
+        $params = [
+            'market' => $market,
+        ];
+        return $this->callApi('position/pending', $params, "GET");
     }
 
     public function getOrderStatus($market, $orderId)

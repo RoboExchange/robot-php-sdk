@@ -33,7 +33,12 @@ class CoinexHttpClient
         $ch = curl_init();
 
         //add tonce to params
-        $params = array_merge($params, ['timestamp' => $this->timestamp]);
+        if ($params == null) {
+            $params = ['timestamp' => $this->timestamp];
+        } else {
+            print_r($params);
+            $params = array_merge($params, ['timestamp' => $this->timestamp]);
+        }
 
         //set method request
         $method = strtoupper($method);
